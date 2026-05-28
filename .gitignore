@@ -12,7 +12,7 @@ venv/
 env/
 
 # ---- Model checkpoints + caches ----
-*.pth
+# *.pth - COMMENTED OUT FOR DEPLOYMENT (we need to include our models)
 *.pt
 *.onnx
 *.ckpt
