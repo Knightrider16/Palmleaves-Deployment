@@ -43,6 +43,12 @@ app.config["SECRET_KEY"] = os.environ.get(
 )
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
 
+# Initialize database and directories on app startup (for gunicorn)
+store.init_db()
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+GALLERY_DIR.mkdir(parents=True, exist_ok=True)
+(ROOT / "static" / "samples").mkdir(parents=True, exist_ok=True)
+
 
 @app.template_filter("highlight")
 def highlight_filter(text: str, tokens) -> Markup:
