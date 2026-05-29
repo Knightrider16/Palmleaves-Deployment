@@ -10,26 +10,6 @@
       <h1 class="page-title">Welcome, {{ session.user|capitalize }}</h1>
       <p class="page-sub">Explore, discover and contribute to our archival heritage.</p>
     </div>
-    {% if stats %}
-      <div class="stat-band">
-        <div class="stat">
-          <div class="stat-num">{{ stats.total }}</div>
-          <div class="stat-label">Records</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ stats.available }}</div>
-          <div class="stat-label">Available</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{% if stats.year_min %}{{ stats.year_min }}–{{ stats.year_max }}{% else %}—{% endif %}</div>
-          <div class="stat-label">Year range</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ stats.messages }}</div>
-          <div class="stat-label">Messages</div>
-        </div>
-      </div>
-    {% endif %}
   </div>
 
   <div class="tiles">
