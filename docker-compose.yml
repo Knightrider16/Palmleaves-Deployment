@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount uploads and data directories for persistence
+      - ./webapp/static/uploads:/app/webapp/static/uploads
+      - ./webapp/data:/app/webapp/data
+      - ./models:/app/models
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
