@@ -43,12 +43,6 @@ app.config["SECRET_KEY"] = os.environ.get(
 )
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
 
-# Initialize database and directories on app startup (for gunicorn)
-store.init_db()
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-GALLERY_DIR.mkdir(parents=True, exist_ok=True)
-(ROOT / "static" / "samples").mkdir(parents=True, exist_ok=True)
-
 
 @app.template_filter("highlight")
 def highlight_filter(text: str, tokens) -> Markup:
@@ -193,9 +187,15 @@ def transliteration():
 
 @app.route("/api/transliterate", methods=["POST"])
 def api_transliterate():
+    import cv2
+    import time
+
     model_name = (request.form.get("model") or "").strip()
     if model_name not in transliterate.available_models():
         return jsonify({"error": "Select a model."}), 400
+
+    # Upscale method toggle: "realesrgan" or "bicubic" (default bicubic for safety)
+    use_realesrgan = request.form.get("upscale_method") == "realesrgan"
 
     file = request.files.get("image")
     sample = (request.form.get("sample") or "").strip()
@@ -222,9 +222,26 @@ def api_transliterate():
         return jsonify({"error": "Upload an image or pick a sample."}), 400
 
     try:
-        lines = transliterate.run(model_name, str(src_path))
+        lines, stages, metadata = transliterate.run(
+            model_name, str(src_path), use_realesrgan=use_realesrgan
+        )
+
+        # Save preprocessing stage images
+        timestamp = str(int(time.time() * 1000))
+        base_name = Path(src_path).stem
+        stage_urls = {}
+
+        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        for stage_name, stage_img in stages.items():
+            stage_filename = f"{base_name}_{stage_name}_{timestamp}.png"
+            stage_path = UPLOAD_DIR / stage_filename
+            cv2.imwrite(str(stage_path), stage_img)
+            stage_urls[stage_name] = url_for("static", filename=f"uploads/{stage_filename}")
+
     except Exception as e:
+        import traceback
         app.logger.exception("transliteration failed")
+        print(f"TRANSLITERATION ERROR: {e}\n{traceback.format_exc()}")
         return jsonify({"error": f"Inference failed: {e}"}), 500
 
     text = "\n".join(" ".join(line) for line in lines if line)
@@ -233,6 +250,8 @@ def api_transliterate():
         "model": model_name,
         "lines": lines,
         "text": text,
+        "stages": stage_urls,
+        "metadata": metadata,
     })
 
 

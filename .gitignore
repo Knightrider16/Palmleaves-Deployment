@@ -22,6 +22,8 @@ env/
 /data
 /data2
 /weights
+# Exception: Real-ESRGAN weights needed for deployment
+!/weights/realesrgan_x4plus.pth
 /toy_data
 rejects/
 benchmark/amadi/

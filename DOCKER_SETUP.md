@@ -34,6 +34,12 @@ Open your browser and go to:
 http://localhost:5000
 ```
 
+**Available Pages:**
+- `/` - Login page
+- `/projects` - Transliteration with Real-ESRGAN
+- `/search` - Semantic search
+- `/dashboard` - Dashboard with recent additions
+
 ### 4. View Logs
 If running in detached mode, view logs with:
 ```bash
@@ -74,6 +80,18 @@ docker system prune -a
 ✅ **Works on any OS** - Windows, Mac, Linux
 ✅ **Consistent environment** - Everyone uses the same setup
 ✅ **Easy sharing** - Just clone and run `docker-compose up`
+
+## Known Warnings (Harmless)
+
+You'll see these warnings on startup - they're **expected and don't affect functionality**:
+- ⚠️ `functional_tensor module is deprecated` - Real-ESRGAN uses old torchvision API, but it works fine
+- ⚠️ Deprecation warnings are cosmetic only
+
+**All Features Work:**
+- ✅ Transliteration with Real-ESRGAN upscaling: `http://localhost:5000/projects`
+- ✅ Search with semantic embeddings: `http://localhost:5000/search`
+- ✅ Dashboard: `http://localhost:5000/dashboard`
+- ✅ Login page: `http://localhost:5000/`
 
 ## Troubleshooting
 
