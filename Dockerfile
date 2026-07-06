@@ -18,12 +18,19 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first (for better Docker layer caching)
 COPY requirements.txt .
 
-# Install Python dependencies
-# --retries 5 handles unstable network connections during large downloads (e.g. torch ~670 MB)
-RUN pip install --no-cache-dir --retries 5 torch==2.1.0 torchvision==0.16.0 && \
-    pip install --no-cache-dir --no-build-isolation basicsr && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gevent
+# Install in separate layers so Docker caches each step independently.
+# If torch succeeds but a later step fails, it won't re-download torch.
+
+# CPU-only torch wheel (~200 MB vs ~670 MB for the default CUDA wheel)
+RUN pip install --no-cache-dir --default-timeout=1000 \
+    torch==2.1.0 torchvision==0.16.0 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+RUN pip install --no-cache-dir --no-build-isolation basicsr
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install --no-cache-dir gevent
 
 # Copy the entire application
 COPY . .
